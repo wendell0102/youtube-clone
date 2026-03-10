@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #181818;
+            color: #fff;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #202020;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-icon {
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            background-color: #ff0000;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-center {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            margin: 0 40px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #121212;
+            border: 1px solid #303030;
+            border-radius: 2px 0 0 2px;
+            color: #fff;
+            outline: none;
+        }
+
+        .search-btn {
+            padding: 0 20px;
+            background-color: #303030;
+            border: 1px solid #303030;
+            border-left: none;
+            border-radius: 0 2px 2px 0;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .header-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 56px;
+            width: 240px;
+            height: calc(100vh - 56px);
+            background-color: #202020;
+            padding: 12px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 24px;
+            cursor: pointer;
+            gap: 24px;
+        }
+
+        .sidebar-item:hover {
+            background-color: #303030;
+        }
+
+        .sidebar-item.active {
+            background-color: #303030;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: #303030;
+            margin: 12px 0;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 240px;
+            margin-top: 56px;
+            padding: 20px;
+        }
+
+        .categories {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            background-color: #303030;
+            border: none;
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .category-btn.active {
+            background-color: #fff;
+            color: #000;
+        }
+
+        /* Videos Grid */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card {
+            cursor: pointer;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(0,0,0,0.8);
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .video-info {
+            display: flex;
+            gap: 12px;
+        }
+
+        .channel-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .video-details h3 {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .video-metadata {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 72px;
+            }
+
+            .sidebar-item span {
+                display: none;
+            }
+
+            .main {
+                margin-left: 72px;
+            }
+
+            .videos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="menu-icon">☰</div>
+            <a href="#" class="logo">
+                <div class="logo-icon">▶</div>
+                <span>YouTube</span>
+            </a>
+        </div>
+        <div class="header-center">
+            <input type="text" class="search-bar" placeholder="Pesquisar">
+            <button class="search-btn">🔍</button>
+        </div>
+        <div class="header-right">
+            <div class="header-icon">📹</div>
+            <div class="header-icon">🔔</div>
+            <div class="user-avatar"></div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-item active">
+            <span>🏠</span>
+            <span>Início</span>
+        </div>
+        <div class="sidebar-item">
+            <span>🔥</span>
+            <span>Explorar</span>
+        </div>
+        <div class="sidebar-item">
+            <span>📺</span>
+            <span>Shorts</span>
+        </div>
+        <div class="sidebar-item">
+            <span>📚</span>
+            <span>Inscrições</span>
+        </div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item">
+            <span>📚</span>
+            <span>Biblioteca</span>
+        </div>
+        <div class="sidebar-item">
+            <span>⏱️</span>
+            <span>Histórico</span>
+        </div>
+        <div class="sidebar-item">
+            <span>🎬</span>
+            <span>Seus vídeos</span>
+        </div>
+        <div class="sidebar-item">
+            <span>⏰</span>
+            <span>Assistir mais tarde</span>
+        </div>
+        <div class="sidebar-item">
+            <span>👍</span>
+            <span>Vídeos marcados</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+        <!-- Categories -->
+        <div class="categories">
+            <button class="category-btn active">Tudo</button>
+            <button class="category-btn">Música</button>
+            <button class="category-btn">Jogos</button>
+            <button class="category-btn">Programação</button>
+            <button class="category-btn">Notícias</button>
+            <button class="category-btn">Esportes</button>
+            <button class="category-btn">Culinária</button>
+            <button class="category-btn">Cinema</button>
+        </div>
+
+        <!-- Videos Grid -->
+        <div class="videos-grid" id="videosGrid"></div>
+    </div>
+
+    <script>
+        // Generate sample videos
+        const videosGrid = document.getElementById('videosGrid');
+        const videoTitles = [
+            'Como programar em JavaScript - Tutorial completo',
+            'Os melhores momentos do futebol 2026',
+            'Receita de bolo de chocolate delicioso',
+            'Gameplay incrível de Elden Ring',
+            'Notícias da semana - Resumo completo',
+            'Aprenda React do zero',
+            'Viagem pelo Brasil - Nordeste',
+            'Top 10 filmes de 2026',
+            'Como configurar seu VS Code',
+            'Música para estudar e relaxar',
+            'Tutorial de CSS Grid e Flexbox',
+            'Melhores jogadas da NBA',
+        ];
+
+        const emojis = ['🎮', '🎵', '🍕', '⚽', '💻', '🎬', '📱', '🚀', '🎨', '📚', '🏆', '🌟'];
+
+        for (let i = 0; i < 12; i++) {
+            const videoCard = document.createElement('div');
+            videoCard.className = 'video-card';
+            videoCard.innerHTML = `
+                <div class="video-thumbnail">
+                    <span>${emojis[i]}</span>
+                    <div class="video-duration">${Math.floor(Math.random() * 20 + 5)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-avatar"></div>
+                    <div class="video-details">
+                        <h3>${videoTitles[i]}</h3>
+                        <div class="video-metadata">
+                            <div>Canal ${i + 1}</div>
+                            <div>${Math.floor(Math.random() * 900 + 100)}K visualizações • ${Math.floor(Math.random() * 30 + 1)} dias atrás</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            videosGrid.appendChild(videoCard);
+        }
+    </script>
+</body>
+</html>
