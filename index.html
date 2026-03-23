@@ -181,6 +181,13 @@
 
         .video-card {
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .video-card:hover .video-thumbnail {
+            opacity: 0.85;
         }
 
         .video-thumbnail {
@@ -194,6 +201,15 @@
             align-items: center;
             justify-content: center;
             font-size: 48px;
+            transition: opacity 0.2s;
+            overflow: hidden;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
         }
 
         .video-duration {
@@ -232,19 +248,25 @@
             color: #aaa;
         }
 
+        /* Loading / Empty state */
+        .loading-msg {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #aaa;
+            padding: 40px 0;
+            font-size: 16px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 72px;
             }
-
             .sidebar-item span {
                 display: none;
             }
-
             .main {
                 margin-left: 72px;
             }
-
             .videos-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
@@ -252,126 +274,148 @@
     </style>
 </head>
 <body>
+
     <!-- Header -->
-    <div class="header">
+    <header class="header">
         <div class="header-left">
-            <div class="menu-icon">☰</div>
+            <span class="menu-icon">&#9776;</span>
             <a href="#" class="logo">
-                <div class="logo-icon">▶</div>
-                <span>YouTube</span>
+                <div class="logo-icon">
+                    <span style="color:white;font-size:16px;">&#9654;</span>
+                </div>
+                &nbsp;YouTube
             </a>
         </div>
+
         <div class="header-center">
             <input type="text" class="search-bar" placeholder="Pesquisar">
-            <button class="search-btn">🔍</button>
+            <button class="search-btn">&#128269;</button>
         </div>
+
         <div class="header-right">
-            <div class="header-icon">📹</div>
-            <div class="header-icon">🔔</div>
+            <span class="header-icon">&#128249;</span>
+            <span class="header-icon">&#128276;</span>
             <div class="user-avatar"></div>
         </div>
-    </div>
+    </header>
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <nav class="sidebar">
         <div class="sidebar-item active">
-            <span>🏠</span>
-            <span>Início</span>
+            <span>&#127968;</span>
+            <span>In&iacute;cio</span>
         </div>
         <div class="sidebar-item">
-            <span>🔥</span>
+            <span>&#128293;</span>
             <span>Explorar</span>
         </div>
         <div class="sidebar-item">
-            <span>📺</span>
+            <span>&#128250;</span>
             <span>Shorts</span>
         </div>
         <div class="sidebar-item">
-            <span>📚</span>
-            <span>Inscrições</span>
+            <span>&#128218;</span>
+            <span>Inscri&ccedil;&otilde;es</span>
         </div>
         <div class="sidebar-divider"></div>
         <div class="sidebar-item">
-            <span>📚</span>
+            <span>&#128218;</span>
             <span>Biblioteca</span>
         </div>
         <div class="sidebar-item">
-            <span>⏱️</span>
-            <span>Histórico</span>
+            <span>&#9201;</span>
+            <span>Hist&oacute;rico</span>
         </div>
         <div class="sidebar-item">
-            <span>🎬</span>
-            <span>Seus vídeos</span>
+            <span>&#127916;</span>
+            <span>Seus v&iacute;deos</span>
         </div>
         <div class="sidebar-item">
-            <span>⏰</span>
+            <span>&#9200;</span>
             <span>Assistir mais tarde</span>
         </div>
         <div class="sidebar-item">
-            <span>👍</span>
-            <span>Vídeos marcados</span>
+            <span>&#128077;</span>
+            <span>V&iacute;deos marcados</span>
         </div>
-    </div>
+    </nav>
 
-    <!-- Main Content -->
-    <div class="main">
-        <!-- Categories -->
+    <!-- Main -->
+    <main class="main">
         <div class="categories">
             <button class="category-btn active">Tudo</button>
-            <button class="category-btn">Música</button>
+            <button class="category-btn">M&uacute;sica</button>
             <button class="category-btn">Jogos</button>
-            <button class="category-btn">Programação</button>
-            <button class="category-btn">Notícias</button>
+            <button class="category-btn">Programa&ccedil;&atilde;o</button>
+            <button class="category-btn">Not&iacute;cias</button>
             <button class="category-btn">Esportes</button>
-            <button class="category-btn">Culinária</button>
+            <button class="category-btn">Culin&aacute;ria</button>
             <button class="category-btn">Cinema</button>
         </div>
 
-        <!-- Videos Grid -->
-        <div class="videos-grid" id="videosGrid"></div>
-    </div>
+        <div class="videos-grid" id="videosGrid">
+            <p class="loading-msg">Carregando v&iacute;deos...</p>
+        </div>
+    </main>
 
     <script>
-        // Generate sample videos
-        const videosGrid = document.getElementById('videosGrid');
-        const videoTitles = [
-            'Como programar em JavaScript - Tutorial completo',
-            'Os melhores momentos do futebol 2026',
-            'Receita de bolo de chocolate delicioso',
-            'Gameplay incrível de Elden Ring',
-            'Notícias da semana - Resumo completo',
-            'Aprenda React do zero',
-            'Viagem pelo Brasil - Nordeste',
-            'Top 10 filmes de 2026',
-            'Como configurar seu VS Code',
-            'Música para estudar e relaxar',
-            'Tutorial de CSS Grid e Flexbox',
-            'Melhores jogadas da NBA',
-        ];
+        const API_URL = 'http://localhost:3000';
 
-        const emojis = ['🎮', '🎵', '🍕', '⚽', '💻', '🎬', '📱', '🚀', '🎨', '📚', '🏆', '🌟'];
+        const emojis = ['\uD83C\uDFAE', '\uD83C\uDFB5', '\uD83C\uDF55', '\u26BD', '\uD83D\uDCBB', '\uD83C\uDFAC', '\uD83D\uDCF1', '\uD83D\uDE80', '\uD83C\uDFA8', '\uD83D\uDCDA', '\uD83C\uDFC6', '\uD83C\uDF1F'];
 
-        for (let i = 0; i < 12; i++) {
-            const videoCard = document.createElement('div');
-            videoCard.className = 'video-card';
-            videoCard.innerHTML = `
-                <div class="video-thumbnail">
-                    <span>${emojis[i]}</span>
-                    <div class="video-duration">${Math.floor(Math.random() * 20 + 5)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}</div>
-                </div>
-                <div class="video-info">
-                    <div class="channel-avatar"></div>
-                    <div class="video-details">
-                        <h3>${videoTitles[i]}</h3>
-                        <div class="video-metadata">
-                            <div>Canal ${i + 1}</div>
-                            <div>${Math.floor(Math.random() * 900 + 100)}K visualizações • ${Math.floor(Math.random() * 30 + 1)} dias atrás</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            videosGrid.appendChild(videoCard);
+        async function carregarVideos() {
+            const grid = document.getElementById('videosGrid');
+
+            try {
+                const resp = await fetch(API_URL + '/api/videos');
+
+                if (!resp.ok) throw new Error('Erro ao buscar videos');
+
+                const videos = await resp.json();
+
+                grid.innerHTML = '';
+
+                if (videos.length === 0) {
+                    grid.innerHTML = '<p class="loading-msg">Nenhum v&iacute;deo encontrado. Adicione v&iacute;deos na pasta do servidor.</p>';
+                    return;
+                }
+
+                videos.forEach((video, i) => {
+                    const card = document.createElement('a');
+                    card.className = 'video-card';
+                    card.href = 'watch.html?id=' + video.id;
+
+                    const thumbContent = video.thumbnail
+                        ? '<img src="' + API_URL + video.thumbnail + '" alt="' + video.title + '">'
+                        : '<span>' + (emojis[i % emojis.length]) + '</span>';
+
+                    card.innerHTML =
+                        '<div class="video-thumbnail">'
+                        + thumbContent
+                        + '<div class="video-duration">' + (video.duration || '00:00') + '</div>'
+                        + '</div>'
+                        + '<div class="video-info">'
+                        + '<div class="channel-avatar"></div>'
+                        + '<div class="video-details">'
+                        + '<h3>' + video.title + '</h3>'
+                        + '<div class="video-metadata">'
+                        + '<div>' + video.channel + '</div>'
+                        + '<div>' + video.views + ' &bull; ' + video.date + '</div>'
+                        + '</div>'
+                        + '</div>'
+                        + '</div>';
+
+                    grid.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<p class="loading-msg">&#x26A0; N&atilde;o foi poss&iacute;vel conectar ao servidor. Certifique-se de que o backend est&aacute; rodando em <strong>http://localhost:3000</strong></p>';
+            }
         }
+
+        carregarVideos();
     </script>
+
 </body>
 </html>
