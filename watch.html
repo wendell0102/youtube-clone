@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistir - YouTube Clone</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #181818;
+            color: #fff;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #202020;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-icon {
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            background-color: #ff0000;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-center {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            margin: 0 40px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #121212;
+            border: 1px solid #303030;
+            border-radius: 2px 0 0 2px;
+            color: #fff;
+            outline: none;
+        }
+
+        .search-btn {
+            padding: 0 20px;
+            background-color: #303030;
+            border: 1px solid #303030;
+            border-left: none;
+            border-radius: 0 2px 2px 0;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .header-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Watch layout */
+        .watch-container {
+            margin-top: 70px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .player-wrapper {
+            width: 100%;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .player-wrapper video {
+            width: 100%;
+            max-height: 560px;
+            display: block;
+        }
+
+        .video-info-section {
+            width: 100%;
+        }
+
+        .video-info-section h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .video-channel-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .channel-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .channel-name {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .video-meta {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 20px;
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .back-btn:hover {
+            color: #fff;
+        }
+
+        .error-msg {
+            color: #aaa;
+            font-size: 16px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <span class="menu-icon">&#9776;</span>
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <span style="color:white;font-size:16px;">&#9654;</span>
+                </div>
+                &nbsp;YouTube
+            </a>
+        </div>
+
+        <div class="header-center">
+            <input type="text" class="search-bar" placeholder="Pesquisar">
+            <button class="search-btn">&#128269;</button>
+        </div>
+
+        <div class="header-right">
+            <span class="header-icon">&#128249;</span>
+            <span class="header-icon">&#128276;</span>
+            <div class="user-avatar"></div>
+        </div>
+    </header>
+
+    <!-- Watch Content -->
+    <div class="watch-container">
+        <a href="index.html" class="back-btn">&#8592; Voltar para in&iacute;cio</a>
+
+        <div id="watchContent">
+            <p class="error-msg">Carregando v&iacute;deo...</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        async function carregarVideo() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const content = document.getElementById('watchContent');
+
+            if (!id) {
+                content.innerHTML = '<p class="error-msg">&#x26A0; Nenhum v&iacute;deo selecionado. <a href="index.html" style="color:#fff;">Voltar ao in&iacute;cio</a></p>';
+                return;
+            }
+
+            try {
+                const resp = await fetch(API_URL + '/api/videos');
+                if (!resp.ok) throw new Error('Erro na API');
+
+                const videos = await resp.json();
+                const video = videos.find(v => v.id === id);
+
+                if (!video) {
+                    content.innerHTML = '<p class="error-msg">&#x26A0; V&iacute;deo n&atilde;o encontrado. <a href="index.html" style="color:#fff;">Voltar ao in&iacute;cio</a></p>';
+                    return;
+                }
+
+                document.title = video.title + ' - YouTube Clone';
+
+                content.innerHTML =
+                    '<div class="player-wrapper">'
+                    + '<video id="player" controls autoplay>'
+                    + '<source src="' + API_URL + video.src + '" type="video/mp4">'
+                    + 'Seu navegador n&atilde;o suporta o elemento de v&iacute;deo.'
+                    + '</video>'
+                    + '</div>'
+                    + '<div class="video-info-section">'
+                    + '<h1>' + video.title + '</h1>'
+                    + '<div class="video-channel-row">'
+                    + '<div class="channel-avatar"></div>'
+                    + '<div>'
+                    + '<div class="channel-name">' + video.channel + '</div>'
+                    + '<div class="video-meta">' + video.views + ' &bull; ' + video.date + '</div>'
+                    + '</div>'
+                    + '</div>'
+                    + '</div>';
+
+            } catch (err) {
+                console.error(err);
+                content.innerHTML = '<p class="error-msg">&#x26A0; N&atilde;o foi poss&iacute;vel conectar ao servidor. Verifique se o backend est&aacute; rodando em <strong>http://localhost:3000</strong></p>';
+            }
+        }
+
+        carregarVideo();
+    </script>
+
+</body>
+</html>
