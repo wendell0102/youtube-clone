@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3000;
@@ -10,31 +11,41 @@ app.use(cors());
 const videosPath = path.join(__dirname, 'videos');
 const thumbsPath = path.join(__dirname, 'thumbnails');
 
-const videos = [
-  {
-    id: '1',
-    title: 'Meu primeiro video',
-    channel: 'Wendell',
-    views: '123 visualizacoes',
-    date: 'ha 1 dia',
-    duration: '10:30',
-    thumbnail: '/thumbnails/video1.jpg',
-    src: '/videos/video1.mp4'
-  },
-  {
-    id: '2',
-    title: 'Segundo video',
-    channel: 'Wendell',
-    views: '456 visualizacoes',
-    date: 'ha 2 dias',
-    duration: '5:45',
-    thumbnail: '/thumbnails/video2.jpg',
-    src: '/videos/video2.mp4'
-  }
-];
+// Cria as pastas se nao existirem
+if (!fs.existsSync(videosPath)) fs.mkdirSync(videosPath);
+if (!fs.existsSync(thumbsPath)) fs.mkdirSync(thumbsPath);
+
+// Escaneia a pasta videos/ automaticamente
+function getVideos() {
+  if (!fs.existsSync(videosPath)) return [];
+
+  return fs.readdirSync(videosPath)
+    .filter(file => file.endsWith('.mp4') || file.endsWith('.webm') || file.endsWith('.mkv'))
+    .map((file, index) => {
+      const name = path.parse(file).name;
+      const thumbJpg = name + '.jpg';
+      const thumbPng = name + '.png';
+      const thumbExists = fs.existsSync(path.join(thumbsPath, thumbJpg))
+        ? thumbJpg
+        : fs.existsSync(path.join(thumbsPath, thumbPng))
+          ? thumbPng
+          : null;
+
+      return {
+        id: String(index + 1),
+        title: name.replace(/[-_]/g, ' '),
+        channel: 'Wendell',
+        views: '0 visualizacoes',
+        date: 'recente',
+        duration: '0:00',
+        thumbnail: thumbExists ? `/thumbnails/${thumbExists}` : null,
+        src: `/videos/${file}`
+      };
+    });
+}
 
 app.get('/api/videos', (req, res) => {
-  res.json(videos);
+  res.json(getVideos());
 });
 
 app.use('/videos', express.static(videosPath));
@@ -42,4 +53,5 @@ app.use('/thumbnails', express.static(thumbsPath));
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Videos encontrados: ${getVideos().length}`);
 });
